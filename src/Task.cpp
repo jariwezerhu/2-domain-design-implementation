@@ -52,7 +52,7 @@ bool rearrangeShelf::runTask(Employee& employee, std::vector<Shelf*>& shelves) {
         return false;
     }
     // Check if shelf exists
-    if (shelfID > shelves.size()) {
+    if (shelfID > shelves.size() - 1) {
         return false;
     }
 
