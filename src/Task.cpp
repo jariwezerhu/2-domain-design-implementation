@@ -23,6 +23,7 @@ void Task::setTaskStatus(TaskStatus taskStatus) {
 }
 
 rearrangeShelf::rearrangeShelf(int shelfID) {
+    this->setRequiresForklift(true);
     this->shelfID = shelfID;
 }
 
@@ -31,7 +32,6 @@ int rearrangeShelf::getShelfID() {
 }
 
 bool rearrangeShelf::runTask(Employee& employee, std::vector<Shelf>& shelves) {
-    this->setRequiresForklift(true);
     int shelfID = this->getShelfID();
 
     // Check if employee is busy
@@ -104,30 +104,53 @@ bool pickItems::runTask(Employee& employee, std::vector<Shelf>& shelves) {
     
     // Pick items
     employee.setBusy(true);
-    int itemsPicked = 0;
+    
+    // Check on which shelves the item exists
+    vector<int> shelfIDs;
     for (int i = 0; i < shelves.size(); i++) {
         if (shelves[i].hasItem(itemName)) {
-            // Remove pallet from shelf if it hasItem(itemName) and itemCount == 0
-            for (int j = 0; j < 4; j++) {
-                if (shelves[i].pallets[j] != nullptr && 
-                    shelves[i].pallets[j]->hasItem(itemName) && 
-                    !shelves[i].pallets[j]->isEmpty()) 
-                {
-                    while (itemsPicked < itemCount && !shelves[i].pallets[j]->isEmpty()) {
-                        shelves[i].pallets[j]->takeOne();
-                        itemsPicked++;
-                    }
-                }
-            }
+            shelfIDs.push_back(i);
         }
     }
+
+    // Count how many items are on the shelves
+    int itemsOnShelves = 0;
+    for (int i = 0; i < shelfIDs.size(); i++) {
+        itemsOnShelves += shelves[shelfIDs[i]].getItemCount(itemName);
+    }
+
+    // Check if there are enough items on the shelves
+    if (itemsOnShelves < itemCount) {
+        return false;
+    }
+
+    // If there are enough items, pick them
+    int itemsPicked = 0;
+    for (int i = 0; i < shelfIDs.size(); i++) {
+        int id = shelfIDs[i];
+        // Iterate through all pallets on the shelf
+        for (int j = 0; j < 4; j++) {
+            // Check if pallet exists, has the item and is not empty
+            if (shelves[id].pallets[j] == nullptr || !shelves[id].pallets[j]->hasItem(itemName) || shelves[id].pallets[j]->isEmpty()) {
+                continue;
+            }
+            // Take items from the pallet until it is empty or the required amount of items is picked
+            while(!shelves[id].pallets[j]->isEmpty() && itemsPicked < itemCount) {
+                shelves[id].pallets[j]->takeOne();
+                itemsPicked++;
+            }
+            // If enough items were picked, break the loop
+            if (itemsPicked == itemCount) {
+                break;
+            }
+        }
+        if (itemsPicked == itemCount) {
+            break;
+        }
+    }
+
     employee.setBusy(false);
 
     // Check if all items were picked
     return itemsPicked == itemCount;
 }
-
-// putItems::putItems(string itemName, int itemCount) {
-//     this->itemName = itemName;
-//     this->itemCount = itemCount;
-// }
