@@ -17,7 +17,7 @@ class Task {
         void setRequiresForklift(bool requiresForklift);
         TaskStatus getTaskStatus();
         void setTaskStatus(TaskStatus taskStatus);
-        virtual bool runTask(Employee& employee, std::vector<Shelf>& shelves) = 0;
+        virtual bool runTask(Employee& employee, std::vector<Shelf*>& shelves) = 0;
         void setTaskID(int taskID);
         int getTaskID();
     private:
@@ -30,7 +30,7 @@ class rearrangeShelf : public Task {
     public:
         rearrangeShelf(int taskID, int shelfID, bool requiresForklift);
         int getShelfID();
-        bool runTask(Employee& employee, std::vector<Shelf>& shelves) override;
+        bool runTask(Employee& employee, std::vector<Shelf*>& shelves) override;
     private:
         int shelfID;
 };
@@ -40,7 +40,7 @@ class pickItems : public Task {
         pickItems(int taskID, std::string itemName, int itemCount, bool requiresForklift);
         std::string getItemName();
         int getItemCount();
-        bool runTask(Employee& employee, std::vector<Shelf>& shelves) override;
+        bool runTask(Employee& employee, std::vector<Shelf*>& shelves) override;
     private:
         std::string itemName;
         int itemCount;
