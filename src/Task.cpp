@@ -22,9 +22,18 @@ void Task::setTaskStatus(TaskStatus taskStatus) {
     this->taskStatus = taskStatus;
 }
 
-rearrangeShelf::rearrangeShelf(int shelfID) {
-    this->setRequiresForklift(true);
+void Task::setTaskID(int taskID) {
+    this->taskID = taskID;
+}
+
+int Task::getTaskID() {
+    return taskID;
+}
+
+rearrangeShelf::rearrangeShelf(int taskID, int shelfID, bool requiresForklift = true) {
+    this->setRequiresForklift(requiresForklift);
     this->shelfID = shelfID;
+    this->setTaskID(taskID);
 }
 
 int rearrangeShelf::getShelfID() {
@@ -36,19 +45,23 @@ bool rearrangeShelf::runTask(Employee& employee, std::vector<Shelf>& shelves) {
 
     // Check if employee is busy
     if (employee.getBusy()) {
+        setTaskStatus(TaskStatus::failed);
         return false;
     }
     // Check if forklift is required and if employee has a forklift certificate
     if (this->getRequiresForklift() && !employee.getForkliftCertificate()) {
+        setTaskStatus(TaskStatus::failed);
         return false;
     }
     // Check if shelf exists
     if (shelfID > shelves.size()) {
+        setTaskStatus(TaskStatus::failed);
         return false;
     }
 
     // Check if shelf is empty
     if (shelves[shelfID].isEmpty()) {
+        setTaskStatus(TaskStatus::failed);
         return false;
     }
 
@@ -57,12 +70,14 @@ bool rearrangeShelf::runTask(Employee& employee, std::vector<Shelf>& shelves) {
     shelves[shelfID].sortPallets();
     employee.setBusy(false);
 
+    setTaskStatus(TaskStatus::finished);
     return true;
 }
 
-pickItems::pickItems(std::string itemName, int itemCount) {
+pickItems::pickItems(int taskID, std::string itemName, int itemCount, bool requiresForklift = false) {
     this->itemName = itemName;
     this->itemCount = itemCount;
+    this->setRequiresForklift(requiresForklift);
 }
 
 std::string pickItems::getItemName() {
@@ -74,20 +89,22 @@ int pickItems::getItemCount() {
 }
 
 bool pickItems::runTask(Employee& employee, std::vector<Shelf>& shelves) {
-    this->setRequiresForklift(false);
     std::string itemName = this->getItemName();
     int itemCount = this->getItemCount();
 
     // Check if employee is busy
     if (employee.getBusy()) {
+        setTaskStatus(TaskStatus::failed);
         return false;
     }
     // Check if forklift is required and if employee has a forklift certificate
     if (this->getRequiresForklift() && !employee.getForkliftCertificate()) {
+        setTaskStatus(TaskStatus::failed);
         return false;
     }
     // Check if item count is valid
     if (itemCount <= 0) {
+        setTaskStatus(TaskStatus::failed);
         return false;
     }
     // Check if item exists on any shelf
@@ -99,6 +116,7 @@ bool pickItems::runTask(Employee& employee, std::vector<Shelf>& shelves) {
         }
     }
     if (!itemExists) {
+        setTaskStatus(TaskStatus::failed);
         return false;
     }
     
@@ -121,6 +139,7 @@ bool pickItems::runTask(Employee& employee, std::vector<Shelf>& shelves) {
 
     // Check if there are enough items on the shelves
     if (itemsOnShelves < itemCount) {
+        setTaskStatus(TaskStatus::failed);
         return false;
     }
 
@@ -152,5 +171,11 @@ bool pickItems::runTask(Employee& employee, std::vector<Shelf>& shelves) {
     employee.setBusy(false);
 
     // Check if all items were picked
-    return itemsPicked == itemCount;
+    if (itemsPicked == itemCount) {
+        setTaskStatus(TaskStatus::finished);
+        return true;
+    }
+    
+    setTaskStatus(TaskStatus::failed);
+    return false;
 }
