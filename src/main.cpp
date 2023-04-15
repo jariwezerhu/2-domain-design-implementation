@@ -2,64 +2,127 @@
 #include "../include/Shelf.hpp"
 #include "../include/Employee.hpp"
 #include "../include/Task.hpp"
+#include "../include/Warehouse.hpp"
 
 #include <iostream>
 #include <array>
 using namespace std;
 
 int main() {
-    // Create a few random items
+    Warehouse warehouse = Warehouse();
+
+    // Create a few random items names
     vector<string> items;
     for (int i = 0; i < 10; i++) {
         items.push_back("Item" + to_string(i));
     }
 
     // Create shelves
-    vector<Shelf> shelves;
     for (int i = 0; i < 10; i++) {
-        shelves.push_back(Shelf());
+        Shelf* shelf = new Shelf();
+        warehouse.addShelf(shelf);
     }
     // Fill shelves with pallets
-    for (int i = 0; i < shelves.size(); i++) {
+    for (int i = 0; i < 10; i++) {
         for (int j = 0; j < 4; j++) {
-            // Randomly choose an item from the list
             string item = items[rand() % items.size()];
-            // Randomly choose a capacity between 0 and 10
             int capacity = rand() % 11;
-            // Randomly choose a count between 0 and the capacity
             int count = rand() % (capacity + 1);
-            // Create a pallet with the item, capacity, and count
             Pallet* pallet = new Pallet(item, capacity, count);
-            // Insert the pallet into the shelf
-            shelves[i].insertPallet(j, pallet);
+            warehouse.shelves[i]->insertPallet(j, pallet);
         }
     }
 
+    // Print shelf information
+    cout << "Shelves:" << endl;
+    for (int i = 0; i < warehouse.shelves.size(); i++) {
+        cout << "Shelf " << i << ":" << endl;
+        array<bool, 4> slotStatus = warehouse.shelves[i]->getSlotStatus();
+        for (int j = 0; j < 4; j++) {
+            cout << "Slot " << j << ": " << slotStatus[j] << endl;
+        }
+        cout << endl;
+    }
+
     // Create some employees
-    vector<Employee> employees;
     for (int i = 0; i < 10; i++) {
         string name = "Employee" + to_string(i);
-        Employee employee = Employee(i, name, rand() % 2);
-        employees.push_back(employee);
+        Employee* employee = new Employee(i, name, rand() % 2);
+        warehouse.addEmployee(employee);
     }
 
     // Print employee information
     cout << "Employees:" << endl;
-    for (int i = 0; i < employees.size(); i++) {
-        cout << "ID: " << employees[i].getID() << endl;
-        cout << "Name: " << employees[i].getName() << endl;
-        cout << "Forklift Certificate: " << employees[i].getForkliftCertificate() << endl;
+    for (int i = 0; i < warehouse.employees.size(); i++) {
+        cout << "Employee " << i << ":" << endl;
+        cout << "ID: " << warehouse.employees[i]->getID() << endl;
+        cout << "Name: " << warehouse.employees[i]->getName() << endl;
         cout << endl;
     }
 
-    // Create pickItem task
-    pickItems pickItemsTask = pickItems("Item2", 10);
+    // Create some pickitems tasks
+    pickItems pickItemsTask = pickItems(0, "Item2", 10, true);
+    pickItems pickItemsTask2 = pickItems(1, "Item3", 5, false);
+    pickItems pickItemsTask3 = pickItems(2, "Item2", 3, true);
+    pickItems pickItemsTask4 = pickItems(3, "Item6", 2, false);
 
-    // Run pickItems task
-    bool success = pickItemsTask.runTask(employees[0], shelves);
-    if (success) {
-        cout << "Task completed successfully!" << endl;
-    } else {
-        cout << "Task failed!" << endl;
+    // Create some rearrange tasks
+    rearrangeShelf rearrangeTask = rearrangeShelf(4, 0, false);
+    rearrangeShelf rearrangeTask2 = rearrangeShelf(5, 3, true);
+    rearrangeShelf rearrangeTask3 = rearrangeShelf(6, 6, false);
+    rearrangeShelf rearrangeTask4 = rearrangeShelf(7, 2, true);
+
+    // Add tasks to warehouse
+    warehouse.addTask(&pickItemsTask);
+    warehouse.addTask(&pickItemsTask2);
+    warehouse.addTask(&pickItemsTask3);
+    warehouse.addTask(&pickItemsTask4);
+    warehouse.addTask(&rearrangeTask);
+    warehouse.addTask(&rearrangeTask2);
+    warehouse.addTask(&rearrangeTask3);
+    warehouse.addTask(&rearrangeTask4);
+
+    // Run all tasks
+    warehouse.performAllTasks();
+
+    // Print success of tasks
+    cout << "Tasks:" << endl;
+    for (int i = 0; i < warehouse.tasks.size(); i++) {
+        TaskStatus status = warehouse.tasks[i]->getTaskStatus();
+        string statusString;
+        if (status == TaskStatus::todo) {
+            statusString = "todo";
+        } else if (status == TaskStatus::finished) {
+            statusString = "finished";
+        } else if (status == TaskStatus::failed) {
+            statusString = "failed";
+        } 
+        cout << "Task " << i << ":" << endl;
+        cout << "Success: " << statusString << endl;
+        cout << endl;
     }
+
+    warehouse.performAllTasks();
+
+    // Print success of tasks
+    cout << "Tasks:" << endl;
+    for (int i = 0; i < warehouse.tasks.size(); i++) {
+        TaskStatus status = warehouse.tasks[i]->getTaskStatus();
+        string statusString;
+        if (status == TaskStatus::todo) {
+            statusString = "todo";
+        } else if (status == TaskStatus::finished) {
+            statusString = "finished";
+        } else if (status == TaskStatus::failed) {
+            statusString = "failed";
+        } 
+        cout << "Task " << i << ":" << endl;
+        cout << "Success: " << statusString << endl;
+        cout << endl;
+    }
+
+    std::cout << "Press enter to exit..." << std::endl;
+    std::cin.get();
+
+    return 0;
 }
