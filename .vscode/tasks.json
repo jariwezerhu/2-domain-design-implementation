@@ -14,6 +14,7 @@
 				"${workspaceFolder}/src/Shelf.cpp",
 				"${workspaceFolder}/src/Employee.cpp",
 				"${workspaceFolder}/src/Task.cpp",
+				"${workspaceFolder}/src/Warehouse.cpp",
 				"-o",
 				"${fileDirname}\\${fileBasenameNoExtension}.exe"
 			],
