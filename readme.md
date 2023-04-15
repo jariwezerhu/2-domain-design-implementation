@@ -15,3 +15,5 @@ Als een task op todo staat, wordt hij uitgevoerd. Als deze succesvol is, wordt h
 Als hij faalt, wordt het failed.
 
 Als een task op failed staat, wordt hij op todo gezet.
+
+Run als admin als de output vreemd is.
