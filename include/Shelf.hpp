@@ -15,4 +15,5 @@ class Shelf : public IContainer {
         bool isFull() override;
         bool isEmpty() override;
         bool hasItem(std::string item) override;
+        int getItemCount(std::string item);
 };
