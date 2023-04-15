@@ -42,14 +42,3 @@ class pickItems : public Task {
         std::string itemName;
         int itemCount;
 };
-
-// class putItems : public Task {
-//     public:
-//         putItems(string itemName, int itemCount);
-//         string getItemName();
-//         int getItemCount();
-//         bool runTask(Employee& employee, vector<Shelf>& shelves);
-//     private:
-//         string itemName;
-//         int itemCount;
-// };
