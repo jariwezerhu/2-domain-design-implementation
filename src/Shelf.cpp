@@ -93,3 +93,13 @@ bool Shelf::hasItem(string item) {
     }
     return false;
 }
+
+int Shelf::getItemCount(std::string item) {
+    int itemCount = 0;
+    for (int i = 0; i < 4; i++) {
+        if (pallets[i] != nullptr && pallets[i]->hasItem(item)) {
+            itemCount += pallets[i]->getItemCount();
+        }
+    }
+    return itemCount;
+}
