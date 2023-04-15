@@ -18,11 +18,26 @@ TaskStatus Warehouse::getTotalTaskStatus() {
 };
 
 void Warehouse::performOneTask(int taskID) {
-    // for (int i = 0; i < this->tasks.size(); i++) {
-    //     if (i == taskID) {
-    //         this->tasks[i]->runTask(*this->employees[0], this->shelves);
-    //     };
-    // };
+    Task* task = this->tasks[taskID];
+    TaskStatus taskStatus = task->getTaskStatus();
+    if (taskStatus == TaskStatus::todo) {
+        for (int i = 0; i < this->employees.size(); i++) {
+            Employee* employee = this->employees[i];
+            if (!employee->getBusy()) {
+                bool taskSuccess = task->runTask(*employee, this->shelves);
+                if (taskSuccess) {
+                    task->setTaskStatus(TaskStatus::finished);
+                    return;
+                } else {
+                    task->setTaskStatus(TaskStatus::failed);
+                    return;
+                };
+            };
+        };
+    };
+    if (taskStatus == TaskStatus::failed) {
+        task->setTaskStatus(TaskStatus::todo);
+    };
 };
 
 void Warehouse::performAllTasks() {
